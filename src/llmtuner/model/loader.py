@@ -3,6 +3,7 @@ from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer
 from transformers.integrations import is_deepspeed_zero3_enabled
 from transformers.utils.versions import require_version
 from trl import AutoModelForCausalLMWithValueHead
+import os
 
 import llmtuner.model.patcher as patcher
 from llmtuner.extras.logging import get_logger
@@ -47,6 +48,10 @@ def load_model_and_tokenizer(
         "revision": model_args.model_revision,
         "token": model_args.hf_hub_token
     }
+    if model_args.flash_attn:
+        os.environ['HF_ATTN_IMPLEMENTATION'] = "flash_attention_2"
+    else:
+        os.environ['HF_ATTN_IMPLEMENTATION'] = "sdpa"
 
     tokenizer = AutoTokenizer.from_pretrained(
         model_args.model_name_or_path,
